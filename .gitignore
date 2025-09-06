@@ -28,5 +28,8 @@
 *.nupkg
 *.snupkg
 
-# Keep game folder ignored as per original file
+# Ignore static libs
+lib/
+
+# Ignore game
 game/*/
