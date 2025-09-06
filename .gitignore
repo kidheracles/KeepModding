@@ -1,0 +1,32 @@
+# This file is a general template for .NET projects.
+# It includes patterns for Visual Studio, Rider, and common build artifacts.
+# For more templates, see https://github.com/github/gitignore
+
+## User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Rider specific
+.idea/
+
+## Build results
+[Aa]rtifacts/
+[Bb]uild/
+[Bb]uilds/
+[Dd]ebug/
+[Rr]elease/
+[Ll]ogs/
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio Team Services
+.vs/
+
+# NuGet Packages
+*.nupkg
+*.snupkg
+
+# Keep game folder ignored as per original file
+game/*/

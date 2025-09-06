@@ -1,0 +1,55 @@
+{
+    "version": "2.0.0",
+    // "inputs": [
+    //     {
+    //         "id": "buildConfiguration",
+    //         "description": "Select the build configuration",
+    //         "type": "string",
+    //         "options": [
+    //             "Debug",
+    //             "Release"
+    //         ],
+    //         "default": "Debug"
+    //     }
+    // ],
+    "tasks": [
+        {
+            "label": "build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/src/KeepModding/KeepModding.csproj",
+                "--configuration",
+                // "${input:buildConfiguration}",
+                "Debug",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "deploy",
+            // Using "process" is more reliable for arguments with spaces.
+            // We explicitly call powershell and pass the command as an argument.
+            "type": "process",
+            "command": "powershell.exe",
+            "args": [
+                "-Command",
+                // "Copy-Item -Path '${workspaceFolder}\\src\\KeepModding\\bin\\${input:buildConfiguration}\\net9.0\\*' -Destination '${workspaceFolder}\\game\\Keep Driving\\mods\\managed' -Force"
+                "Copy-Item -Path '${workspaceFolder}\\src\\KeepModding\\bin\\Debug\\net9.0\\*' -Destination '${workspaceFolder}\\game\\Keep Driving\\mods\\managed' -Force"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build-and-deploy",
+            "dependsOn": ["build", "deploy"],
+            "dependsOrder": "sequence", // This ensures 'build' runs before 'deploy'
+            "problemMatcher": []
+        }
+    ]
+}
