@@ -1,7 +1,17 @@
-﻿using KeepModding.Data;
+﻿using System.Runtime.InteropServices;
+using ManagedMod.Generic;
 
-internal static class TheMod
+using ManagedMod.Core;
+
+namespace ManagedMod;
+
+internal static class ManagedMod
 {
+    private static GameInspector _gameInspector = new();
+
+    private static Playground _playground = new();
+
+
     /// <summary>
     /// The mod entrypoint. Called once when the mod is being loaded.
     /// </summary>
@@ -14,16 +24,12 @@ internal static class TheMod
     /// </returns>
     public static AurieStatus InitializeMod(AurieManagedModule Module)
     {
-        Framework.Print("Hello, world!");
-        Framework.Print($"Game Directory: {Framework.GetGameDirectory()}");
         Framework.Print($"Game Process: {Framework.GetGameProcessPath()}");
 
-        var inspector = new GameInspector();
-        Task.Delay(2000).ContinueWith(_ =>
-        {
-            Framework.Print("This message appears after 2 seconds!");
-            inspector.InspectGlobalObject();
-        }, TaskScheduler.Default);
+        _gameInspector.Initialize(Module);
+        // Title.Run(Module);
+        _playground.Initialize(Module);
+
 
         return AurieStatus.Success;
     }
@@ -38,6 +44,7 @@ internal static class TheMod
     public static void UnloadMod(AurieManagedModule Module)
     {
         Framework.Print("Goodbye, world!");
+        _gameInspector.finish(Module);
     }
 
 }
