@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using System.Globalization;
+using System.Collections.Immutable;
 
 namespace ManagedMod.Generic;
 
@@ -10,8 +11,10 @@ public class GameInspector : IGameInspector
 {
     private Dictionary<string, int> _eventCounts = [];
     private double _totalMs;
-    private double _printInterval = 10000; // 10 seconds
+    private double _printInterval = 5000; // 5 seconds
     private double _nextPrintTime;
+    private HashSet<string> _previousEvents = [];
+    private HashSet<string> _intervalEvents = [];
 
 
     public void Initialize(AurieManagedModule IModule)
@@ -28,7 +31,8 @@ public class GameInspector : IGameInspector
         Game.Events.OnGameEvent -= this.CountEvent;
         Game.Events.OnFrame -= this.ReportEventsSometimes;
         Framework.Print($"Unloaded Event Counter");
-        this.PrintEventCounter();
+        Framework.Print($"--- Event Counter --- [{this._totalMs}]");
+        PrintEventCounter(this._eventCounts);
     }
 
     private void ReportEventsSometimes(int FrameNumber, double DeltaTime)
@@ -38,24 +42,35 @@ public class GameInspector : IGameInspector
         {
             // Framework.Print($"Frame: {FrameNumber}, Delta Time: {DeltaTime.ToString(CultureInfo.InvariantCulture)}");
             this._nextPrintTime += this._printInterval;
-            this.PrintEventCounter();
+            this.PrintNewEvents();
         }
     }
 
     private void CountEvent(CodeExecutionContext context)
     {
         this._eventCounts[context.Name] = this._eventCounts.GetValueOrDefault(context.Name, 0) + 1;
-
+        this._intervalEvents.Add(context.Name);
     }
-    private void PrintEventCounter()
+    private static void PrintEventCounter(Dictionary<string, int> eventCounts)
     {
-        Framework.Print($"--- Event Counter --- [{this._totalMs}]");
-        IOrderedEnumerable<KeyValuePair<string, int>> sortedEvents = this._eventCounts.OrderBy(entry => entry.Key);
+        IOrderedEnumerable<KeyValuePair<string, int>> sortedEvents = eventCounts.OrderBy(entry => entry.Key);
         foreach (KeyValuePair<string, int> entry in sortedEvents)
         {
             Framework.PrintEx(AurieLogSeverity.Trace, $"Event: {entry.Key}, Count: {entry.Value}");
         }
 
+    }
+    private void PrintNewEvents()
+    {
+        var newEventKeys = this._intervalEvents.Except(this._previousEvents).ToImmutableList();
+
+        if (!newEventKeys.IsEmpty)
+        {
+            Framework.Print($"--- New Events {newEventKeys.Count}/{this._eventCounts.Count}---");
+            PrintEventCounter(this._eventCounts.Where(entry => newEventKeys.Contains(entry.Key)).ToDictionary(entry => entry.Key, entry => entry.Value));
+            this._previousEvents.UnionWith(this._intervalEvents);
+        }
+        this._intervalEvents.Clear();
     }
 
     public static void InspectGlobalObject()

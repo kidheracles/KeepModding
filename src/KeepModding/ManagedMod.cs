@@ -26,7 +26,7 @@ internal static class ManagedMod
     {
         Framework.Print($"Game Process: {Framework.GetGameProcessPath()}");
 
-        _gameInspector.Initialize(Module);
+        // _gameInspector.Initialize(Module);
         // Title.Run(Module);
         _playground.Initialize(Module);
 

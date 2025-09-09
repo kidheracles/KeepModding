@@ -10,12 +10,22 @@ public class InputManager : IInputManager
     private readonly Dictionary<string, IEnumerable<BeforeScriptCallbackHandler>> _preHooks = [];
     private readonly Dictionary<string, IEnumerable<AfterScriptCallbackHandler>> _postHooks = [];
     private readonly HashSet<string> _inputs = [];
-    private readonly string _inputEventName = "gml_Object_input_controller_object_Step_1";
+    
+    // private readonly string _inputEventName = "gml_Object_input_controller_object_Step_1";gml_Object_obj_input_controller_Step_1
+    private readonly string _inputEventName = "gml_Object_obj_input_controller_Other_75";
     public InputManager()
     {
         Framework.PrintEx(AurieLogSeverity.Trace, "Listening for input events...");
         Game.Events.OnGameEvent += this.InputEvent;
+        // Game.Events.OnFrame += this.InputFrame;
     }
+
+    // private void InputFrame(int FrameNumber, double DeltaTime)
+    // {
+    //     Game.Engine.GetBuiltinVariable("keyboard_key");
+    // }
+
+    // Config Verbs: { keyboard_and_mouse : { car_left : [ arrow left,A ], up : [ arrow up,W ], car_right : [ arrow right,D ], accept : space, pause : escape, right : [ arrow right,D ], car_menu : C, cancel : backspace, action : enter, shoot : mouse button left, honk : space, down : [ arrow down,S ], special : shift, left : [ arrow left,A ] }, touch : { up : virtual button, accept : virtual button, pause : virtual button, special : virtual button, down : virtual button, right : virtual button, left : virtual button, cancel : virtual button, action : virtual button }, gamepad : { car_left : [ gamepad thumbstick l left,gamepad trigger l,gamepad dpad left ], left_down : gamepad thumbstick l down, left_left : gamepad thumbstick l left, left_right : gamepad thumbstick l right, up : [ gamepad thumbstick l up,gamepad dpad up ], accept : gamepad face south, rt : gamepad trigger r, pause : gamepad start, car_menu : gamepad face north, left_up : gamepad thumbstick l up, action : gamepad face west, shoot : [ gamepad trigger l,gamepad trigger r ], honk : gamepad thumbstick l click, down : [ gamepad thumbstick l down,gamepad dpad down ], special : gamepad face north, lb : gamepad shoulder l, select : gamepad select, dpad_down : gamepad dpad down, dpad_left : gamepad dpad left, dpad_right : gamepad dpad right, only_A : gamepad face south, only_B : gamepad face east, dpad_up : gamepad dpad up, rb : gamepad shoulder r, car_right : [ gamepad thumbstick l right,gamepad trigger r,gamepad dpad right ], lt : gamepad trigger l, right : [ gamepad thumbstick l right,gamepad dpad right ], cancel : gamepad face east, right_down : gamepad thumbstick r down, right_left : gamepad thumbstick r left, right_right : gamepad thumbstick r right, right_stick_press : gamepad thumbstick r click, left : [ gamepad thumbstick l left,gamepad dpad left ], right_up : gamepad thumbstick r up } }
 
     private AurieStatus _BindInput(AurieManagedModule Module, String Input)
     {
@@ -88,21 +98,23 @@ public class InputManager : IInputManager
     {
         if (context != null && context.Name == this._inputEventName)
         {
-            Framework.PrintEx(AurieLogSeverity.Trace, $"Event: {context.Name} ({context.Self.Name} -> {context.Other.Name})");
-            foreach (GameVariable arg in context.Arguments)
+            Framework.PrintEx(AurieLogSeverity.Trace, $"Event: {context.Name} ({context.Self.Name} ({context.Self.Members.Count}) -> {context.Other.Name} ({context.Other.Members.Count}))");
+            try
             {
-                Framework.PrintEx(AurieLogSeverity.Trace, $"Argument: {arg}");
+                foreach (GameVariable arg in context.Arguments)
+                {
+                    Framework.PrintEx(AurieLogSeverity.Trace, $"Argument: {arg}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Framework.PrintEx(AurieLogSeverity.Error, $"{ex.Message} Source: {ex.Source} {ex.Data}");
+                Framework.PrintEx(AurieLogSeverity.Error, ex.StackTrace);
+                throw;
             }
             foreach (KeyValuePair<string, GameVariable> member in context.Self.Members)
             {
-                try
-                {
-                    Framework.PrintEx(AurieLogSeverity.Trace, $"Key: {member.Key}, Value: {member.Value}");
-                }
-                catch (SEHException sehex)
-                {
-                    Framework.PrintEx(AurieLogSeverity.Warning, $"Key: {member.Key}, Error: {sehex.Message}");
-                }
+                Framework.PrintEx(AurieLogSeverity.Trace, $"Key: {member.Key}, Value: {member.Value}");
             }
         }
     }

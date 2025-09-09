@@ -15,8 +15,8 @@
       <HintPath>lib\AurieSharpInterop.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="AurieSharpInterop">
-      <HintPath>lib\UndertaleModTool.dll</HintPath>
+    <Reference Include="UndertaleModLib">
+      <HintPath>lib\UndertaleModLib.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
