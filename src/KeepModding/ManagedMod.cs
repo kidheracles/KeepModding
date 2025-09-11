@@ -1,6 +1,4 @@
-﻿using System.Runtime.InteropServices;
-using ManagedMod.Generic;
-
+﻿using ManagedMod.Generic;
 using ManagedMod.Core;
 
 namespace ManagedMod;
@@ -10,6 +8,7 @@ internal static class ManagedMod
     private static GameInspector _gameInspector = new();
 
     private static Playground _playground = new();
+    private static Title _title = new();
 
 
     /// <summary>
@@ -26,9 +25,9 @@ internal static class ManagedMod
     {
         Framework.Print($"Game Process: {Framework.GetGameProcessPath()}");
 
-        // _gameInspector.Initialize(Module);
-        // Title.Run(Module);
         _playground.Initialize(Module);
+        _title.Initialize(Module);
+
 
 
         return AurieStatus.Success;
@@ -45,6 +44,8 @@ internal static class ManagedMod
     {
         Framework.Print("Goodbye, world!");
         _gameInspector.finish(Module);
+        _playground.finish(Module);
+        _title.finish(Module);
     }
 
 }

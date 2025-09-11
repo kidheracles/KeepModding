@@ -1,5 +1,4 @@
 using System.Runtime.InteropServices;
-using System.Globalization;
 using System.Collections.Immutable;
 
 namespace ManagedMod.Generic;
@@ -9,21 +8,19 @@ namespace ManagedMod.Generic;
 /// </summary>
 public class GameInspector : IGameInspector
 {
-    private Dictionary<string, int> _eventCounts = [];
+    private Dictionary<Tuple<string,string>, int> _eventCounts = [];
     private double _totalMs;
     private double _printInterval = 5000; // 5 seconds
     private double _nextPrintTime;
-    private HashSet<string> _previousEvents = [];
-    private HashSet<string> _intervalEvents = [];
+    private HashSet<Tuple<string,string>> _previousEvents = [];
+    private HashSet<Tuple<string,string>> _intervalEvents = [];
 
-
-    public void Initialize(AurieManagedModule IModule)
+    public void Initialize(AurieManagedModule Module)
     {
         this._nextPrintTime = this._printInterval;
         Game.Events.OnGameEvent += this.CountEvent;
         Game.Events.OnFrame += this.ReportEventsSometimes;
         Framework.Print($"Loaded Event Counter");
-
     }
 
     public void finish(AurieManagedModule IModule)
@@ -48,13 +45,14 @@ public class GameInspector : IGameInspector
 
     private void CountEvent(CodeExecutionContext context)
     {
-        this._eventCounts[context.Name] = this._eventCounts.GetValueOrDefault(context.Name, 0) + 1;
-        this._intervalEvents.Add(context.Name);
+        var eventKey = Tuple.Create(context.Name, context.Self.Name);
+        this._eventCounts[eventKey] = this._eventCounts.GetValueOrDefault(eventKey, 0) + 1;
+        this._intervalEvents.Add(eventKey);
     }
-    private static void PrintEventCounter(Dictionary<string, int> eventCounts)
+    private static void PrintEventCounter(Dictionary<Tuple<string,string>, int> eventCounts)
     {
-        IOrderedEnumerable<KeyValuePair<string, int>> sortedEvents = eventCounts.OrderBy(entry => entry.Key);
-        foreach (KeyValuePair<string, int> entry in sortedEvents)
+        IOrderedEnumerable<KeyValuePair<Tuple<string,string>, int>> sortedEvents = eventCounts.OrderBy(entry => entry.Key);
+        foreach (KeyValuePair<Tuple<string,string>, int> entry in sortedEvents)
         {
             Framework.PrintEx(AurieLogSeverity.Trace, $"Event: {entry.Key}, Count: {entry.Value}");
         }
@@ -115,20 +113,4 @@ public class GameInspector : IGameInspector
         }
     }
 
-    public static void SnapshotAfterInput(ScriptExecutionContext context)
-    {
-        if (context != null)
-        {
-            Framework.Print($"Snapshot requested for {context.Self.Name} ({context.Self.Members.Count})");
-        }
-    }
-
-    
-    public static void SnapshotAfterBuiltin(BuiltinExecutionContext context)
-    {
-        if (context != null)
-        {
-            Framework.Print($"Snapshot requested for {context.Self.Name} ({context.Self.Members.Count})");
-        }
-    }
 }
